@@ -1,0 +1,9 @@
+services:
+  db-productos:
+    image: mysql:8.0
+    container_name: contenedor-mysql-productos
+    environment:
+      MYSQL_DATABASE: productos_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
