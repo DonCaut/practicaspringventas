@@ -76,7 +76,47 @@ public class ProductoController {
         return ResponseEntity.ok(respuesta);
     }
 
+// ✏️ Actualizar un producto existente usando PUT
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ProductoResponseDTO>> actualizarProducto(
+            @PathVariable Long id, 
+            @RequestBody ProductoRequestDTO request) {
+        
+        // 1. Buscamos el producto en la base de datos de Docker, si no existe lanzamos error
+        Producto productoExistente = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("El producto con ID " + id + " no existe."));
 
+        // 2. Modificamos los valores con lo que nos envió Flutter
+        productoExistente.setNombre(request.getNombre());
+        productoExistente.setPrecio(request.getPrecio());
+        productoExistente.setStock(request.getStock());
+
+        // 3. Guardamos los cambios en la base de datos
+        Producto guardado = repository.save(productoExistente);
+
+        // 4. Mapeamos a un ResponseDTO para responder de manera limpia
+        ProductoResponseDTO responseDTO = new ProductoResponseDTO();
+        responseDTO.setId(guardado.getId());
+        responseDTO.setNombre(guardado.getNombre());
+        responseDTO.setPrecio(guardado.getPrecio());
+        responseDTO.setStock(guardado.getStock());
+
+        ApiResponse<ProductoResponseDTO> respuesta = new ApiResponse<>(true, responseDTO, "Producto actualizado con éxito");
+        return ResponseEntity.ok(respuesta);
+    }
+
+    // 🗑️ Eliminar un producto por ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> eliminarProducto(@PathVariable Long id) {
+        // Verificamos si existe antes de borrar
+        Producto producto = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("El producto con ID " + id + " no existe."));
+
+        repository.delete(producto);
+
+        ApiResponse<Void> respuesta = new ApiResponse<>(true, null, "Producto eliminado correctamente");
+        return ResponseEntity.ok(respuesta);
+    }
 }
 
 
